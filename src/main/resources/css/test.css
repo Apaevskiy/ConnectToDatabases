@@ -1,0 +1,10 @@
+.button {
+    /*-fx-pref-height: 53;*/
+    /*-fx-pref-width: 200;*/
+    /*-fx-background-color:  #1E90FF;*/
+    /*-fx-text-fill: white;*/
+    /*-fx-font-size: 18px;*/
+}
+.hidden{
+    visibility: false;
+}
