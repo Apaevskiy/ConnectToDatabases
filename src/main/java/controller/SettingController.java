@@ -1,7 +1,7 @@
-package Controllers;
+package controller;
 
-import Config.FX.MyAnchorPane;
-import Config.XMLHandler;
+import Models.MyAnchorPane;
+import XML.XMLHandler;
 import Models.DataBase;
 import Models.TypeOfDataBase;
 import javafx.beans.property.SimpleObjectProperty;
@@ -55,7 +55,7 @@ public class SettingController extends MyAnchorPane {
 
 
     public SettingController() {
-        super("/views/SettingPage.fxml", PriorityType.NON_PRIORITY_PAGE);
+        super("/views/SettingPage.fxml");
         ObservableList<DataBase> listDataBases = FXCollections.observableArrayList();
         tableOfDB.setItems(listDataBases);
         try {
@@ -136,12 +136,12 @@ public class SettingController extends MyAnchorPane {
                 tableOfDB.getItems().remove(tableOfDB.getSelectionModel().getSelectedItem());
         });
         cm.getItems().addAll(menuAdd, menuDelete);
+
         tableOfDB.addEventHandler(MOUSE_CLICKED, event -> {
             if (event.getButton() == MouseButton.SECONDARY) {
                 tableOfDB.setContextMenu(cm);
             }
         });
-
 
         checkButton.setOnAction(actionEvent -> {
             checkButton.setDisable(true);
@@ -187,13 +187,7 @@ public class SettingController extends MyAnchorPane {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         });
-    }
-
-    @Override
-    public void timer() {
-
     }
 
     public void testingDatabase(DataBase dataBase) {

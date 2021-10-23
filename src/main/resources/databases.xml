@@ -1,1 +1,1 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><databases xmlns="https://github.com/Apaevskiy/"><database comment="Альфа" password="alfabase" path="192.168.0.2/base" type="AlfaBase" user="SYSDBA"/><database comment="Проходная депо 1" password="masterkey" path="192.168.0.250/C:/Program Files (x86)/ENT/Server/DB/cbase.fdb" type="Checkpoint" user="SYSDBA"/></databases>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><databases xmlns="https://github.com/Apaevskiy/"><database comment="" password="1" path="localhost/base" type="AlfaBase" user="SYSDBA"/></databases>
