@@ -23,7 +23,7 @@ public class XMLHandler extends DefaultHandler {
             String password = attributes.getValue("password");
             TypeOfDataBase type = TypeOfDataBase.valueOf(attributes.getValue("type"));
             String comment = attributes.getValue("comment");
-            list.add(new Database(path,user, password, comment, type,null));
+            list.add(new Database(path,user, password, comment, type));
         }
     }
 }

@@ -57,9 +57,9 @@ public class CreateXML extends Task<Void> {
                 personElement.setAttribute("rank", String.valueOf(person.getRank()));
                 personElement.setAttribute("department", String.valueOf(person.getDepartment().getId()));
                 personElement.setAttribute("position", String.valueOf(person.getPosition().getId()));
-                personElement.setAttribute("surname", person.getSurname());
-                personElement.setAttribute("name", person.getName());
-                personElement.setAttribute("patronymic", person.getPatronymic());
+                personElement.setAttribute("surname", person.getLastName());
+                personElement.setAttribute("name", person.getFirstName());
+                personElement.setAttribute("patronymic", person.getMiddleName());
                 personElement.setAttribute("birthday", String.valueOf(person.getBirthday()));
                 personElement.setAttribute("startWork", String.valueOf(person.getStartWork()));
                 personElement.setAttribute("placeOfResident", person.getPlaceOfResident());

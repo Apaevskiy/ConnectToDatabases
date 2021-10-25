@@ -63,9 +63,9 @@ public class XMLController extends MyAnchorPane {
 
         idColumn.setCellValueFactory(p -> new SimpleLongProperty(p.getValue().getId()).asObject());
         numberColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getNumber()));
-        surnameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getSurname()));
-        nameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getName()));
-        patronymicColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getPatronymic()));
+        surnameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getLastName()));
+        nameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getFirstName()));
+        patronymicColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getMiddleName()));
         positionColumn.setCellValueFactory(p -> new SimpleStringProperty(positions.get(p.getValue().getPosition().getId())));
         departmentColumn.setCellValueFactory(p -> new SimpleStringProperty(departments.get(p.getValue().getDepartment().getId())));
         photoColumn.setCellValueFactory(p -> new SimpleObjectProperty<>(p.getValue().getPhoto() != null));

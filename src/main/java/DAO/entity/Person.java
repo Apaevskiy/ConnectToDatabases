@@ -27,9 +27,9 @@ public class Person {
     private int rank; // RAZR
     private Department department; // K_PODR
     private Position position; // K_DOLJN
-    private String surname; // FAM
-    private String name; // IM
-    private String patronymic; // OTCH
+    private String lastName; // FAM
+    private String firstName; // IM
+    private String middleName; // OTCH
     private LocalDate birthday; // D_ROJD
     private LocalDate startWork; // D_PR_NA_R
     private String placeOfResident; // ADDR_PROP_TEXT

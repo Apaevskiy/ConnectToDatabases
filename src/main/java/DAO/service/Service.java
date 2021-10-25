@@ -25,8 +25,8 @@ public abstract class Service {
             return list;
         } catch (SQLException throwable) {
             throwable.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     protected <T> T queryOneElement(String sql, Mapper<T> mapper) {

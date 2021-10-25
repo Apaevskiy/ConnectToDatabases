@@ -41,7 +41,7 @@ public class KeyController {
     }
     public void setKeys(Person p){
         table.setItems(FXCollections.observableArrayList(p.getKeys()));
-        personField.setText(p.getNumber() + " " + p.getSurname() + " " + p.getName() + " " + p.getPatronymic());
+        personField.setText(p.getNumber() + " " + p.getLastName() + " " + p.getFirstName() + " " + p.getMiddleName());
     }
     @FXML
     void initialize() {

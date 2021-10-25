@@ -93,9 +93,9 @@ public class UsersController extends MyAnchorPane {
 
         idColumn.setCellValueFactory(p -> new SimpleLongProperty(p.getValue().getId()).asObject());
         numberColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getNumber()));
-        surnameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getSurname()));
-        nameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getName()));
-        patronymicColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getPatronymic()));
+        surnameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getLastName()));
+        nameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getFirstName()));
+        patronymicColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getMiddleName()));
         positionColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getPosition().getName()));
         departmentColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getDepartment().getName()));
         photoColumn.setCellValueFactory(p -> new SimpleObjectProperty<>(p.getValue().getPhoto() != null));
@@ -163,7 +163,7 @@ public class UsersController extends MyAnchorPane {
                     inputStage.setScene(newScene);
                     inputStage.showAndWait();
                     List<Key> newKeys = loader.<KeyController>getController().getKeys();
-                    if(service.updateKeys(newKeys, person.getId())){
+                    if (service.updateKeys(newKeys, person.getId())) {
                         person.setKeys(service.getKeysByPerson(person));
                         tableOfDB.refresh();
                     }
@@ -183,7 +183,27 @@ public class UsersController extends MyAnchorPane {
             updateTable();
         });
         loadToBasesButton.setOnAction(actionEvent -> {
-            DatabaseService databaseService = new DatabaseService();
+            TableView.TableViewSelectionModel<Person> model = tableOfDB.getSelectionModel();
+            List<Person> people = model == null ? tableOfDB.getItems() : model.getSelectedItems();
+            if (people != null) {
+                progressIndicator.getStyleClass().removeAll("hidden");
+                loadToBasesButton.setDisable(true);
+                progressIndicator.setProgress(0);
+                DatabaseService databaseService = new DatabaseService(
+                        people, service.getAllDepartments(), service.getAllPositions()
+                );
+                progressIndicator.progressProperty().unbind();
+                progressIndicator.progressProperty().bind(databaseService.progressProperty());
+                databaseService.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, t -> {
+                    progressIndicator.getStyleClass().add("hidden");
+                    createXMLButton.setDisable(false);
+                });
+                databaseService.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, t -> {
+                    createXMLButton.setDisable(false);
+                    progressIndicator.getStyleClass().add("hidden");
+                });
+                new Thread(databaseService).start();
+            }
         });
         createXMLButton.setOnAction(actionEvent -> {
             TableView.TableViewSelectionModel<Person> model = tableOfDB.getSelectionModel();
@@ -234,7 +254,7 @@ public class UsersController extends MyAnchorPane {
                         String password = attributes.getValue("password");
                         TypeOfDataBase type = TypeOfDataBase.valueOf(attributes.getValue("type"));
                         String comment = attributes.getValue("comment");
-                        dataBase = new Database(path, user, password, comment, type, null);
+                        dataBase = new Database(path, user, password, comment, type);
                     }
                 }
             };
