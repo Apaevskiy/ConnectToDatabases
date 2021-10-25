@@ -11,12 +11,14 @@ public class MainController {
     public AnchorPane workPlace;
     public Button settingDBButton;
     public Button userButton;
+    public Button xmlButton;
 
     @FXML
     void initialize() {
         SettingController settingController = new SettingController();
         UsersController usersController = new UsersController();
-        workPlace.getChildren().addAll(settingController, usersController);
+        XMLController xmlController = new XMLController();
+        workPlace.getChildren().addAll(settingController, usersController, xmlController);
 
         settingDBButton.setOnAction(event -> {
             hiddenPages(workPlace.getChildren(), settingController);
@@ -24,12 +26,19 @@ public class MainController {
         userButton.setOnAction(event -> {
             hiddenPages(workPlace.getChildren(), usersController);
         });
+        xmlButton.setOnAction(event -> {
+            hiddenPages(workPlace.getChildren(), xmlController);
+        });
     }
-    private void hiddenPages(List<Node> list, AnchorPane pane) {
+
+    private void hiddenPages(List<Node> list, Node pane) {
         for (Node node : list) {
-            if (node != pane)
-                node.getStyleClass().add("hidden");
-            else node.getStyleClass().remove("hidden");
+            if (node.equals(pane)) {
+                node.getStyleClass().removeAll("hidden");
+            } else {
+                if (!node.getStyleClass().contains("hidden"))
+                    node.getStyleClass().add("hidden");
+            }
         }
     }
 }

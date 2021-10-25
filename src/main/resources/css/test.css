@@ -1,9 +1,11 @@
-.button {
-    /*-fx-pref-height: 53;*/
-    /*-fx-pref-width: 200;*/
-    /*-fx-background-color:  #1E90FF;*/
-    /*-fx-text-fill: white;*/
-    /*-fx-font-size: 18px;*/
+.accordion .button {
+    -fx-pref-height: 30;
+    -fx-pref-width: 150;
+    -fx-background-color:  #1E90FF;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-row-valignment: center;
+    -fx-column-halignment: center;
 }
 .hidden{
     visibility: false;

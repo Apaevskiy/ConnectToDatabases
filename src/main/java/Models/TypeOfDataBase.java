@@ -1,7 +1,8 @@
 package Models;
 
 public enum  TypeOfDataBase {
-    Bufet,
-    Checkpoint,
+    Buffet,
+    Checkpoint_CBASE,
+    Checkpoint_GBASE,
     AlfaBase
 }

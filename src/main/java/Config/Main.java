@@ -4,13 +4,8 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.HBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
 
-import java.io.File;
 import java.net.URL;
 
 public class Main extends Application {
@@ -30,5 +25,42 @@ public class Main extends Application {
         Parent root = loader.load();
         stage.setScene(new Scene(root));
         stage.show();
+        /*FlowPane root = new FlowPane();
+        root.setPadding(new Insets(20));
+        try {
+            Class.forName("org.firebirdsql.jdbc.FBDriver");
+            try {
+                Connection connection = DriverManager.getConnection(
+                        "jdbc:firebirdsql://localhost/base?sql_dialect=3&lc_ctype=WIN1251",
+                        "SYSDBA",
+                        "1");
+                if (connection != null) {
+                    Statement statement = connection.createStatement();
+                    try {
+                        ResultSet resultSet = statement.executeQuery("select PICT from SP_OL_BLOBS");
+                        if(resultSet.next()){
+                            Blob blob = resultSet.getBlob("PICT");
+                            byte[] bytes = blob == null ? null : blob.getBytes(1, (int) blob.length());
+                            if (blob!=null){
+                                InputStream in = blob.getBinaryStream();
+                                Image image = new Image(in);
+                                ImageView imageView = new ImageView(image);
+                                root.getChildren().addAll(imageView);
+                            }
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Scene scene = new Scene(root, 400, 200);
+        stage.setTitle("JavaFX ImageView (o7planning.org)");
+        stage.setScene(scene);
+        stage.show();*/
     }
 }

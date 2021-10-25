@@ -2,11 +2,32 @@
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
     <data-source source="LOCAL" name="alfa" uuid="279fd5c9-23c1-4b4d-9274-6d31f26251fe">
-      <driver-ref>firebird</driver-ref>
+      <driver-ref>java.sql.Driver</driver-ref>
       <synchronize>true</synchronize>
       <configured-by-url>true</configured-by-url>
       <jdbc-driver>org.firebirdsql.jdbc.FBDriver</jdbc-driver>
-      <jdbc-url>jdbc:firebirdsql://localhost/base?sql_dialect=3&amp;lc_ctype=WIN1251</jdbc-url>
+      <jdbc-url>jdbc:firebirdsql://192.168.0.2/base?sql_dialect=3&amp;lc_ctype=WIN1251</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="checkpoint 1 cbase" uuid="4fea842a-e1d8-4888-bdf8-fc97a812f4db">
+      <driver-ref>java.sql.Driver</driver-ref>
+      <synchronize>true</synchronize>
+      <configured-by-url>true</configured-by-url>
+      <jdbc-driver>org.firebirdsql.jdbc.FBDriver</jdbc-driver>
+      <jdbc-url>jdbc:firebirdsql://192.168.0.250/$PROJECT_DIR$/../../../../Program Files (x86)/ENT/Server/DB/cbase.fdb?sql_dialect=3&amp;lc_ctype=WIN1251</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="checkpoint 1 gbase" uuid="eec71fc9-ff1a-441e-9258-42239b634622">
+      <driver-ref>java.sql.Driver</driver-ref>
+      <synchronize>true</synchronize>
+      <configured-by-url>true</configured-by-url>
+      <jdbc-driver>org.firebirdsql.jdbc.FBDriver</jdbc-driver>
+      <jdbc-url>jdbc:firebirdsql://192.168.0.250/$PROJECT_DIR$/../../../../Program Files (x86)/ENT/Server/DB/gbase.fdb?sql_dialect=3&amp;lc_ctype=WIN1251</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="bufet 1 cbase" uuid="bdd58634-9679-4afc-af3b-797689a57736">
+      <driver-ref>java.sql.Driver</driver-ref>
+      <synchronize>true</synchronize>
+      <configured-by-url>true</configured-by-url>
+      <jdbc-driver>org.firebirdsql.jdbc.FBDriver</jdbc-driver>
+      <jdbc-url>jdbc:firebirdsql://192.168.0.26/d:/Ver-3-0-6/BASE/ARM.FDB?sql_dialect=3&amp;lc_ctype=WIN1251</jdbc-url>
     </data-source>
   </component>
 </project>

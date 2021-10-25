@@ -2,7 +2,7 @@ package controller;
 
 import Models.MyAnchorPane;
 import XML.XMLHandler;
-import Models.DataBase;
+import Models.Database;
 import Models.TypeOfDataBase;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -38,26 +38,26 @@ public class SettingController extends MyAnchorPane {
     private Button checkButton;
 
     @FXML
-    private TableColumn<DataBase, String> commentColumn;
+    private TableColumn<Database, String> commentColumn;
     @FXML
-    private TableColumn<DataBase, String> passwordColumn;
+    private TableColumn<Database, String> passwordColumn;
     @FXML
-    private TableColumn<DataBase, String> pathColumn;
+    private TableColumn<Database, String> pathColumn;
     @FXML
-    private TableColumn<DataBase, Boolean> checkColumn;
+    private TableColumn<Database, Boolean> checkColumn;
     @FXML
-    private TableColumn<DataBase, TypeOfDataBase> typeColumn;
+    private TableColumn<Database, TypeOfDataBase> typeColumn;
     @FXML
-    private TableColumn<DataBase, String> userColumn;
+    private TableColumn<Database, String> userColumn;
 
     @FXML
-    private TableView<DataBase> tableOfDB;
+    private TableView<Database> tableOfDB;
 
 
     public SettingController() {
         super("/views/SettingPage.fxml");
-        ObservableList<DataBase> listDataBases = FXCollections.observableArrayList();
-        tableOfDB.setItems(listDataBases);
+        ObservableList<Database> listDatabases = FXCollections.observableArrayList();
+        tableOfDB.setItems(listDatabases);
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser parser = factory.newSAXParser();
@@ -101,37 +101,40 @@ public class SettingController extends MyAnchorPane {
         });
 
         commentColumn.setOnEditCommit(
-                (TableColumn.CellEditEvent<DataBase, String> t) ->
+                (TableColumn.CellEditEvent<Database, String> t) ->
                         (t.getTableView().getItems().get(t.getTablePosition().getRow()))
                                 .setComment(t.getNewValue())
         );
         passwordColumn.setOnEditCommit(
-                (TableColumn.CellEditEvent<DataBase, String> t) ->
+                (TableColumn.CellEditEvent<Database, String> t) ->
                         (t.getTableView().getItems().get(t.getTablePosition().getRow()))
                                 .setPassword(t.getNewValue())
         );
         pathColumn.setOnEditCommit(
-                (TableColumn.CellEditEvent<DataBase, String> t) ->
+                (TableColumn.CellEditEvent<Database, String> t) ->
                         (t.getTableView().getItems().get(t.getTablePosition().getRow()))
                                 .setPath(t.getNewValue())
         );
         typeColumn.setOnEditCommit(
-                (TableColumn.CellEditEvent<DataBase, TypeOfDataBase> t) ->
+                (TableColumn.CellEditEvent<Database, TypeOfDataBase> t) ->
                         (t.getTableView().getItems().get(t.getTablePosition().getRow()))
                                 .setType(t.getNewValue())
         );
         userColumn.setOnEditCommit(
-                (TableColumn.CellEditEvent<DataBase, String> t) ->
+                (TableColumn.CellEditEvent<Database, String> t) ->
                         (t.getTableView().getItems().get(t.getTablePosition().getRow()))
                                 .setUser(t.getNewValue())
         );
 
         ContextMenu cm = new ContextMenu();
         MenuItem menuAdd = new MenuItem("Добавить базу данных");
-        menuAdd.setOnAction(e -> tableOfDB.getItems().add(new DataBase()));
+        menuAdd.setOnAction(e -> {
+            tableOfDB.getItems().add(new Database());
+            tableOfDB.getSelectionModel().selectLast();
+        });
         MenuItem menuDelete = new MenuItem("Удалить базу данных");
         menuDelete.setOnAction(e -> {
-            TableView.TableViewSelectionModel<DataBase> model = tableOfDB.getSelectionModel();
+            TableView.TableViewSelectionModel<Database> model = tableOfDB.getSelectionModel();
             if (model != null && model.getSelectedCells().size() != 0)
                 tableOfDB.getItems().remove(tableOfDB.getSelectionModel().getSelectedItem());
         });
@@ -146,10 +149,10 @@ public class SettingController extends MyAnchorPane {
         checkButton.setOnAction(actionEvent -> {
             checkButton.setDisable(true);
             AtomicInteger i = new AtomicInteger();
-            for (DataBase db : tableOfDB.getItems()) {
+            for (Database db : tableOfDB.getItems()) {
                 Runnable r = () -> {
                     db.setCheckConnect(null);
-                    if (!db.equals(new DataBase())) {
+                    if (!db.equals(new Database())) {
                         testingDatabase(db);
                         tableOfDB.refresh();
                     }
@@ -168,8 +171,8 @@ public class SettingController extends MyAnchorPane {
                 Element rootElement =
                         doc.createElementNS("https://github.com/Apaevskiy/", "databases");
                 doc.appendChild(rootElement);
-                for (DataBase db : tableOfDB.getItems()) {
-                    if (!db.equals(new DataBase())) {
+                for (Database db : tableOfDB.getItems()) {
+                    if (!db.equals(new Database())) {
                         Element database = doc.createElement("database");
                         database.setAttribute("path", db.getPath());
                         database.setAttribute("user", db.getUser());
@@ -190,7 +193,7 @@ public class SettingController extends MyAnchorPane {
         });
     }
 
-    public void testingDatabase(DataBase dataBase) {
+    public void testingDatabase(Database dataBase) {
         try {
             Class.forName("org.firebirdsql.jdbc.FBDriver");
         } catch (ClassNotFoundException e) {

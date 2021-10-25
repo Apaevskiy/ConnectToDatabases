@@ -4,9 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.firebirdsql.jdbc.FBBlob;
 
+import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,7 +22,7 @@ public class Person {
     private String number;    // TAB_NOM
     private String passportNumber; // D_NOMER
     private String serialNumber; // D_L_NOMER
-    private Date dateOfReceiving; // D_D_VIDACHI
+    private LocalDate dateOfReceiving; // D_D_VIDACHI
     private String receivingBy; // D_KEM_VIDAN
     private int rank; // RAZR
     private Department department; // K_PODR
@@ -26,10 +30,14 @@ public class Person {
     private String surname; // FAM
     private String name; // IM
     private String patronymic; // OTCH
-    private Date birthday; // D_ROJD
-    private Date startWork; // D_PR_NA_R
+    private LocalDate birthday; // D_ROJD
+    private LocalDate startWork; // D_PR_NA_R
     private String placeOfResident; // ADDR_PROP_TEXT
     private String placeOfBirth; // M_ROJD_TEXT
     private List<Key> keys; // SP_OL_DOPUSK NAIM
-    private Blob photo; // PICT
+    private byte[] photo; // PICT
+
+    public void addKey(Key key) {
+        this.keys.add(key);
+    }
 }

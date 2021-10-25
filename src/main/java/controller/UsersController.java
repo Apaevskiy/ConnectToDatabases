@@ -1,26 +1,34 @@
 package controller;
 
+import DAO.entity.Key;
 import DAO.entity.Person;
+import DAO.service.DatabaseService;
 import DAO.service.UserService;
-import Models.DataBase;
+import Models.Database;
 import Models.MyAnchorPane;
 import Models.TypeOfDataBase;
 import XML.CreateXML;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.*;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,13 +36,21 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Comparator;
 import java.util.List;
+
+import static javafx.scene.input.MouseEvent.MOUSE_CLICKED;
 
 public class UsersController extends MyAnchorPane {
 
     @FXML
     private TableView<Person> tableOfDB;
 
+    @FXML
+    private TableColumn<Person, Long> idColumn;
     @FXML
     private TableColumn<Person, String> numberColumn;
     @FXML
@@ -52,7 +68,7 @@ public class UsersController extends MyAnchorPane {
     @FXML
     private TableColumn<Person, Integer> keyColumn;
     @FXML
-    private TableColumn<Person, String> startWorkColumn;
+    private TableColumn<Person, LocalDate> startWorkColumn;
 
     @FXML
     private Button loadToBasesButton;
@@ -65,7 +81,7 @@ public class UsersController extends MyAnchorPane {
     private ProgressIndicator progressIndicator;
 
 
-    private DataBase dataBase;
+    private Database dataBase;
     private UserService service;
 
     public UsersController() {
@@ -73,7 +89,9 @@ public class UsersController extends MyAnchorPane {
 
         ObservableList<Person> listDataBases = FXCollections.observableArrayList();
         tableOfDB.setItems(listDataBases);
+        tableOfDB.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
+        idColumn.setCellValueFactory(p -> new SimpleLongProperty(p.getValue().getId()).asObject());
         numberColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getNumber()));
         surnameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getSurname()));
         nameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getName()));
@@ -81,9 +99,22 @@ public class UsersController extends MyAnchorPane {
         positionColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getPosition().getName()));
         departmentColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getDepartment().getName()));
         photoColumn.setCellValueFactory(p -> new SimpleObjectProperty<>(p.getValue().getPhoto() != null));
-        keyColumn.setCellValueFactory(p -> new SimpleIntegerProperty(p.getValue() == null ? 0 : p.getValue().getKeys().size()).asObject());
-        startWorkColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getStartWork().toString()));
+        keyColumn.setCellValueFactory(p -> new SimpleIntegerProperty(p.getValue().getKeys() == null ? 0 : p.getValue().getKeys().size()).asObject());
+        startWorkColumn.setCellValueFactory(p -> new SimpleObjectProperty<>(p.getValue().getStartWork()));
 
+        startWorkColumn.setCellFactory(p -> new TableCell<>() {
+            @Override
+            public void updateItem(LocalDate item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)));
+                }
+                setGraphic(null);
+            }
+        });
+        startWorkColumn.setComparator(Comparator.comparingLong(o -> o == null ? 0 : o.toEpochDay()));
         photoColumn.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(Boolean check, boolean empty) {
@@ -98,7 +129,6 @@ public class UsersController extends MyAnchorPane {
                     setText(new String("\u29BB".getBytes(), StandardCharsets.UTF_8));
                     setStyle("-fx-text-fill: red; -fx-font-size: 16");
                 }
-
             }
         });
         keyColumn.setCellFactory(column -> new TableCell<>() {
@@ -114,40 +144,78 @@ public class UsersController extends MyAnchorPane {
                 }
             }
         });
+
+        ContextMenu cm = new ContextMenu();
+        MenuItem pickAllMenu = new MenuItem("Выделить всё");
+        pickAllMenu.setOnAction(e -> tableOfDB.getSelectionModel().selectAll());
+        MenuItem addKeyMenu = new MenuItem("Пропуска");
+        addKeyMenu.setOnAction(e -> {
+            SelectionModel<Person> model = tableOfDB.getSelectionModel();
+            if (model != null && model.getSelectedItem() != null) {
+                Person person = model.getSelectedItem();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Keys.fxml"));
+                Scene newScene;
+                try {
+                    newScene = new Scene(loader.load());
+                    loader.<KeyController>getController().setKeys(person);
+                    Stage inputStage = new Stage();
+                    inputStage.initOwner(tableOfDB.getScene().getWindow());
+                    inputStage.setScene(newScene);
+                    inputStage.showAndWait();
+                    List<Key> newKeys = loader.<KeyController>getController().getKeys();
+                    if(service.updateKeys(newKeys, person.getId())){
+                        person.setKeys(service.getKeysByPerson(person));
+                        tableOfDB.refresh();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        cm.getItems().addAll(pickAllMenu, addKeyMenu);
+        tableOfDB.addEventHandler(MOUSE_CLICKED, event -> {
+            if (event.getButton() == MouseButton.SECONDARY) {
+                tableOfDB.setContextMenu(cm);
+            }
+        });
+
         connectToBaseButton.setOnAction(actionEvent -> {
             updateTable();
         });
         loadToBasesButton.setOnAction(actionEvent -> {
-
+            DatabaseService databaseService = new DatabaseService();
         });
         createXMLButton.setOnAction(actionEvent -> {
-//            progressIndicator.getStyleClass().remove("hidden");
+            TableView.TableViewSelectionModel<Person> model = tableOfDB.getSelectionModel();
+            List<Person> people = model == null ? tableOfDB.getItems() : model.getSelectedItems();
             DirectoryChooser directoryChooser = new DirectoryChooser();
             directoryChooser.setInitialDirectory(new File("src"));
             File selectedDirectory = directoryChooser.showDialog(loadToBasesButton.getScene().getWindow());
-            if(selectedDirectory!=null){
+            if (selectedDirectory != null) {
+                progressIndicator.getStyleClass().removeAll("hidden");
                 createXMLButton.setDisable(true);
                 progressIndicator.setProgress(0);
-                CreateXML createXML = new CreateXML(tableOfDB.getItems(),
+                CreateXML createXML = new CreateXML(people,
                         service.getAllDepartments(),
                         service.getAllPositions(),
                         selectedDirectory.getAbsolutePath());
                 progressIndicator.progressProperty().unbind();
                 progressIndicator.progressProperty().bind(createXML.progressProperty());
-                createXML.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
-                        t -> {
-                            try {
-                                Runtime.getRuntime().exec("explorer.exe /select," + selectedDirectory.getAbsolutePath()+"\\data.xml");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            createXMLButton.setDisable(false);
-                        });
-                createXML.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED,
-                        t -> createXMLButton.setDisable(false));
+                createXML.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, t -> {
+                    try {
+                        Runtime.getRuntime().exec("explorer.exe /select," + selectedDirectory.getAbsolutePath() + "\\data.xml");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    progressIndicator.getStyleClass().add("hidden");
+                    createXMLButton.setDisable(false);
+                });
+                createXML.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, t -> {
+                    createXMLButton.setDisable(false);
+                    progressIndicator.getStyleClass().add("hidden");
+                });
                 new Thread(createXML).start();
             }
-//            progressIndicator.getStyleClass().add("hidden");
         });
     }
 
@@ -166,7 +234,7 @@ public class UsersController extends MyAnchorPane {
                         String password = attributes.getValue("password");
                         TypeOfDataBase type = TypeOfDataBase.valueOf(attributes.getValue("type"));
                         String comment = attributes.getValue("comment");
-                        dataBase = new DataBase(path, user, password, comment, type, null);
+                        dataBase = new Database(path, user, password, comment, type, null);
                     }
                 }
             };
@@ -182,7 +250,7 @@ public class UsersController extends MyAnchorPane {
         }
     }
 
-    private List<Person> connectToMainDatabase(DataBase base) {
+    private List<Person> connectToMainDatabase(Database base) {
         try {
             Class.forName("org.firebirdsql.jdbc.FBDriver");
             try {

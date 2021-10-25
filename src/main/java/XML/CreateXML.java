@@ -8,14 +8,15 @@ import javafx.concurrent.Task;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.sql.Blob;
 import java.util.List;
 
 public class CreateXML extends Task<Void> {
@@ -24,7 +25,7 @@ public class CreateXML extends Task<Void> {
     private final List<Person> people;
     private final String path;
 
-    public CreateXML(List<Person> people,List<Department> departments, List<Position> positions,  String path) {
+    public CreateXML(List<Person> people, List<Department> departments, List<Position> positions, String path) {
         this.departments = departments;
         this.positions = positions;
         this.people = people;
@@ -33,8 +34,9 @@ public class CreateXML extends Task<Void> {
 
     @Override
     protected Void call() {
-        int count = departments.size() + positions.size() + people.size();
+        int count = people.size();
         int i = 0;
+        new File(path + "\\images").mkdirs();
         try {
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -54,7 +56,7 @@ public class CreateXML extends Task<Void> {
                 personElement.setAttribute("receivingBy", person.getReceivingBy());
                 personElement.setAttribute("rank", String.valueOf(person.getRank()));
                 personElement.setAttribute("department", String.valueOf(person.getDepartment().getId()));
-                personElement.setAttribute("department", String.valueOf(person.getPosition().getId()));
+                personElement.setAttribute("position", String.valueOf(person.getPosition().getId()));
                 personElement.setAttribute("surname", person.getSurname());
                 personElement.setAttribute("name", person.getName());
                 personElement.setAttribute("patronymic", person.getPatronymic());
@@ -62,41 +64,34 @@ public class CreateXML extends Task<Void> {
                 personElement.setAttribute("startWork", String.valueOf(person.getStartWork()));
                 personElement.setAttribute("placeOfResident", person.getPlaceOfResident());
                 personElement.setAttribute("placeOfBirth", person.getPlaceOfBirth());
-                Element keysElements = doc.createElement("keys");
-                for (Key key: person.getKeys()) {
-                    Element keyElement = doc.createElement("department");
-                    keyElement.setAttribute("id", String.valueOf(key.getId()));
-                    keyElement.setAttribute("number", String.valueOf(key.getNumber()));
-                    keyElement.setAttribute("start", String.valueOf(key.getStart()));
-                    keyElement.setAttribute("finish", String.valueOf(key.getFinish()));
-                    keysElements.appendChild(keyElement);
+                for (Key key : person.getKeys()) {
+                    Element keyElement = doc.createElement("key");
+                    keyElement.setAttribute("key_id", String.valueOf(key.getId()));
+                    keyElement.setAttribute("key_number", String.valueOf(key.getNumber()));
+                    keyElement.setAttribute("key_start", key.getStart() != null ? key.getStart().toString() : null);
+                    personElement.appendChild(keyElement);
                 }
-                personElement.appendChild(keysElements);
-                Blob photo = person.getPhoto();
-                String data;
-                if(photo!=null) {
-                    byte[] bdata = photo.getBytes(1, (int) photo.length());
-                    data = new String(bdata);
-                } else data="";
-                personElement.setAttribute("photo", data);
-                        peopleElement.appendChild(personElement);
+                byte[] photo = person.getPhoto();
+                if (photo != null) {
+                    File outputfile = new File(path + "\\images\\" + person.getId() + ".png");
+                    ImageIO.write(ImageIO.read(new ByteArrayInputStream(photo)), "png", outputfile);
+                }
+                peopleElement.appendChild(personElement);
                 this.updateProgress(i++, count);
             }
             Element departmentElements = doc.createElement("departments");
-            for (Department department: departments) {
+            for (Department department : departments) {
                 Element element = doc.createElement("department");
                 element.setAttribute("id", String.valueOf(department.getId()));
                 element.setAttribute("name", String.valueOf(department.getName()));
                 departmentElements.appendChild(element);
-                this.updateProgress(i++, count);
             }
             Element positionElements = doc.createElement("positions");
-            for (Position position: positions) {
+            for (Position position : positions) {
                 Element element = doc.createElement("position");
                 element.setAttribute("id", String.valueOf(position.getId()));
                 element.setAttribute("name", String.valueOf(position.getName()));
                 positionElements.appendChild(element);
-                this.updateProgress(i++, count);
             }
 
             rootElement.appendChild(peopleElement);
@@ -105,7 +100,7 @@ public class CreateXML extends Task<Void> {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
-            StreamResult file = new StreamResult(new File(path+"/data.xml"));
+            StreamResult file = new StreamResult(new File(path + "/data.xml"));
             transformer.transform(source, file);
         } catch (Exception e) {
             e.printStackTrace();

@@ -6,8 +6,7 @@ module sample {
     requires java.xml;
     requires org.firebirdsql.jaybird;
     requires java.sql;
-    requires spring.boot.autoconfigure;
-    requires spring.context;
+    requires java.desktop;
     opens controller;
     opens Models;
     opens Config;

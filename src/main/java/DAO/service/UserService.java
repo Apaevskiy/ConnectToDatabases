@@ -1,10 +1,11 @@
 package DAO.service;
 
 import DAO.entity.Department;
-import DAO.entity.Position;
-import DAO.mapper.AlfaBaseMapper;
+import DAO.entity.Key;
 import DAO.entity.Person;
+import DAO.entity.Position;
 import DAO.mapper.DepartmentMapper;
+import DAO.mapper.PersonMapper;
 import DAO.mapper.PositionMapper;
 
 import java.sql.Statement;
@@ -25,7 +26,7 @@ public class UserService extends Service {
                 "left outer join SP_OL_BLOBS i on i.KOD_IL=u.KU " +
                 "left outer join SP_DOLJN pos on pos.KOD=u.K_DOLJN " +
                 "left outer join SP_PODR dep on dep.KOD=u.K_PODR " +
-                "where u.D_UV is null and u.TAB_NOM!=''", new AlfaBaseMapper());
+                "where u.D_UV is null and u.TAB_NOM!='' and u.ku=7397", new PersonMapper()); //u.TAB_NOM!=''
         for (Person base: list) {
             base.setKeys(keyService.getKeysByUserId(base.getId()));
         }
@@ -36,5 +37,20 @@ public class UserService extends Service {
     }
     public List<Position> getAllPositions() {
         return query("select KOD as pos_id, NAIM as pos_name from SP_DOLJN", new PositionMapper());
+    }
+    public List<Key> getKeysByPerson(Person person){
+        return keyService.getKeysByUserId(person.getId());
+    }
+    public boolean updateKeys(List<Key> keys, long personId){
+        for(Key key: keys){
+            if(key.getNumber()!=null){
+                if(key.getId()==0){
+                    if(!keyService.addKey(key,personId)) return false;
+                } else {
+                    if(!keyService.updateKey(key)) return false;
+                }
+            }
+        }
+        return true;
     }
 }
